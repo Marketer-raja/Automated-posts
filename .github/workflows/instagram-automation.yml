@@ -1,0 +1,27 @@
+name: Instagram Automation
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Runs daily at 06:00 UTC (11:30 AM IST)
+  workflow_dispatch: # Lets you click "Run workflow" manually in GitHub
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python3 your_script.py
