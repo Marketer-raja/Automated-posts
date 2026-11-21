@@ -4,8 +4,9 @@
     "date": "2026-11-20",
     "category": "AI agents",
     "url": "https://github.com/openai/openai-agents-python/releases/tag/v1.0.0-alpha.1",
-    "state": "pending",
+    "state": "published",
     "parent": "18038244668673127",
-    "run_day": "2026-11-21"
+    "run_day": "2026-11-21",
+    "media_id": "18014269850771557"
   }
 }
