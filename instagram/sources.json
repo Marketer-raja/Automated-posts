@@ -1,0 +1,10 @@
+[
+  ["Google Ads","Google Ads Developer Blog","https://ads-developers.googleblog.com/feeds/posts/default","google ads|adwords|performance max|demand gen|merchant center"],
+  ["Google Ads","Google Ads & Commerce","https://blog.google/products/ads-commerce/rss/","advertis|campaign|google ads|shopping ads|performance max|merchant"],
+  ["Meta Ads","Meta Newsroom","https://about.fb.com/feed/","advertis|advantage\\+|ads manager|ad campaign|partnership ads|ad creative"],
+  ["SEO","Google Search Central","https://developers.google.com/search/blog/feed.xml",""],
+  ["AI tools","OpenAI","https://openai.com/news/rss.xml","launch|introduc|releas|rollout|rolling out|new in|now available"],
+  ["AI tools","Google AI","https://blog.google/technology/ai/rss/","launch|introduc|releas|rollout|rolling out|gemini|now available"],
+  ["AI agents","OpenAI Agents SDK releases","https://github.com/openai/openai-agents-python/releases.atom",""],
+  ["AI agents","Google ADK releases","https://github.com/google/adk-python/releases.atom",""]
+]

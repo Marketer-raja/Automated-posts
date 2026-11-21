@@ -1,55 +1,67 @@
+"""Daily Marketer Raja Instagram carousel. Run --mode sample for an offline preview."""
+import argparse
+import json
 import os
-import sys
-import time
-import requests
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
-GRAPH_VERSION = "v26.0"
+from instagram.copywriter import write
+from instagram.design import render
+from instagram.discover import rank
+from instagram.history import History
+from instagram.meta import Instagram
+
+OUTPUT = Path("instagram-output")
+SAMPLE = {
+    "slides": ["Where did your leads come from?", "One form can capture leads from several campaigns.",
+               "Your sales team needs the source before it can compare lead quality.",
+               "Save the campaign name with every enquiry."],
+    "caption": "Design preview · Example marketing tip. Track campaign names alongside enquiries so you can compare lead quality. #MarketerRaja #GoogleAds"
+}
 
 
 def main():
-    access_token = os.getenv("META_ACCESS_TOKEN")
-    ig_user_id = os.getenv("IG_USER_ID")
-    image_url = os.getenv("IMAGE_URL")
-    caption = os.getenv("CAPTION", "Automated post via GitHub Actions")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("sample", "preview", "publish"), default="sample")
+    mode = parser.parse_args().mode
+    OUTPUT.mkdir(exist_ok=True)
+    for name in ("01.jpg", "02.jpg", "03.jpg", "04.jpg", "caption.txt", "story.json", "skip.txt"):
+        (OUTPUT / name).unlink(missing_ok=True)
+    if mode == "sample":
+        post, story = SAMPLE, {"sample": True, "category": "Google Ads"}
+    else:
+        live = mode == "publish"
+        history = History(live) if live or os.getenv("GH_TOKEN") else None
+        records = history.records if history else {}
+        ig = Instagram() if live or (os.getenv("META_ACCESS_TOKEN") and os.getenv("IG_USER_ID")) else None
+        if live:
+            ig.reconcile(history)
+            today = datetime.now(ZoneInfo("Asia/Kolkata")).date().isoformat()
+            if any(r.get("run_day") == today and r["state"] == "published" for r in records.values()):
+                return skip("A carousel has already been published today.")
+        affinity = ig.audience_scores(records) if ig else {}
+        # A thin announcement may be rejected by the writer. Try the next candidate.
+        candidates = rank(records, affinity)
+        if not candidates:
+            return skip("No eligible, fresh, unused story found.")
+        for story in candidates:
+            post = write(story)
+            if post:
+                break
+        else:
+            return skip("The top candidates lacked enough material for a factual carousel.")
+    render(post["slides"], OUTPUT)
+    (OUTPUT / "caption.txt").write_text(post["caption"], encoding="utf-8")
+    (OUTPUT / "story.json").write_text(json.dumps({**story, "slides": post["slides"]},
+                                                   indent=2, ensure_ascii=False), encoding="utf-8")
+    if mode == "publish":
+        ig.publish(story, post, OUTPUT, history)
 
-    if not access_token or not ig_user_id or not image_url:
-        print("Missing required env vars: META_ACCESS_TOKEN, IG_USER_ID, IMAGE_URL")
-        sys.exit(1)
 
-    host = "graph.instagram.com" if access_token.startswith("IGA") else "graph.facebook.com"
-    base_url = f"https://{host}/{GRAPH_VERSION}/{ig_user_id}"
-
-    create_res = requests.post(
-        f"{base_url}/media",
-        data={
-            "image_url": image_url,
-            "caption": caption,
-            "access_token": access_token,
-        },
-        timeout=30,
-    )
-    if not create_res.ok:
-        print(f"Step 1 failed ({create_res.status_code}): {create_res.text}")
-        sys.exit(1)
-
-    creation_id = create_res.json().get("id")
-    print(f"Created container ID: {creation_id}")
-
-    time.sleep(3)
-
-    publish_res = requests.post(
-        f"{base_url}/media_publish",
-        data={
-            "creation_id": creation_id,
-            "access_token": access_token,
-        },
-        timeout=30,
-    )
-    if not publish_res.ok:
-        print(f"Step 2 failed ({publish_res.status_code}): {publish_res.text}")
-        sys.exit(1)
-
-    print("Published media response:", publish_res.json())
+def skip(message):
+    print(message)
+    (OUTPUT / "skip.txt").write_text(message, encoding="utf-8")
 
 
 if __name__ == "__main__":
