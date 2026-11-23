@@ -42,15 +42,107 @@ def main():
                 return skip("A carousel has already been published today.")
         affinity = ig.audience_scores(records) if ig else {}
         # A thin announcement may be rejected by the writer. Try the next candidate.
-        candidates = rank(records, affinity)
-        if not candidates:
-            return skip("No eligible, fresh, unused story found.")
+
+
+            try:
+            candidates = rank(records, affinity)
+        except RuntimeError as exc:
+            if str(exc) != "All primary feeds failed. Check the workflow logs.":
+                raise
+            print("News feeds unavailable. Using a marketing tip today.")
+            candidates = []
+
         for story in candidates:
             post = write(story)
             if post:
                 break
         else:
-            return skip("The top candidates lacked enough material for a factual carousel.")
+            tips = [
+                ("Google Ads", "Which searches brought you leads?",
+                 "Review the search terms behind your recent clicks.",
+                 "Look for searches that describe a different service.",
+                 "Review those terms before adding negative keywords."),
+
+                ("Meta Ads", "Which opening line gets attention?",
+                 "Write two openings for the same product and offer.",
+                 "Keep the visual and audience consistent during your test.",
+                 "Compare qualified enquiries as well as clicks."),
+
+                ("SEO", "Does your page answer the search?",
+                 "Pick one search query that already earns impressions.",
+                 "Read the landing page from that searcher's perspective.",
+                 "Move the clearest answer closer to the top."),
+
+                ("AI agents", "Give your agent a practice run",
+                 "Choose one routine task with a clear expected result.",
+                 "Run it on sample data and inspect each action.",
+                 "Set an approval step before it changes live records."),
+
+                ("AI tools", "Can your AI summary be trusted?",
+                 "Give the tool a short brief with three known facts.",
+                 "Compare its summary with the original names and numbers.",
+                 "Correct unsupported claims before sharing the result."),
+
+                ("Google Ads", "Which leads became customers?",
+                 "Label recent enquiries by campaign and sales outcome.",
+                 "Compare how many qualified leads each campaign produced.",
+                 "Review those results before moving your budget."),
+
+                ("Meta Ads", "Does your landing page match your ad?",
+                 "Read your ad headline and landing page side by side.",
+                 "Check that the offer and next step match.",
+                 "Fix the first point where the two disagree."),
+
+                ("SEO", "Can visitors find your service page?",
+                 "Open a related article on your own website.",
+                 "Find the paragraph where a reader might need your service.",
+                 "Add a descriptive link there if it helps the reader."),
+
+                ("AI agents", "What should your agent do when unsure?",
+                 "Give it a sample enquiry with a missing detail.",
+                 "Check whether it asks a question or invents an answer.",
+                 "Define when it should hand the task to a person."),
+
+                ("AI tools", "Which tool writes the better brief?",
+                 "Give two tools the same audience, offer, and word limit.",
+                 "Score both drafts for accuracy, clarity, and editing time.",
+                 "Choose the one that needs fewer factual corrections."),
+            ]
+
+            # Unused tips come first. After all ten, reuse the oldest one.
+            last_used = {}
+            for entry in records.values():
+                if entry.get("state") == "published":
+                    title = entry.get("title", "")
+                    last_used[title] = max(
+                        last_used.get(title, ""), entry.get("run_day", "")
+                    )
+
+            category, hook, detail, impact, action = min(
+                tips, key=lambda tip: last_used.get(tip[1], "")
+            )
+            day = datetime.now(ZoneInfo("Asia/Kolkata")).date().isoformat()
+            story = {
+                "key": f"marketing-tip-{day}",
+                "title": hook,
+                "date": day,
+                "category": category,
+                "source": "Marketer Raja",
+                "url": "",
+                "kind": "evergreen_tip",
+            }
+            hashtag = "#" + category.replace(" ", "")
+            post = {
+                "slides": [hook, detail, impact, action],
+                "caption": (
+                    f"{category} tip from Marketer Raja\n\n{hook}\n\n"
+                    f"{detail} {impact}\n\n{action}\n\n"
+                    f"{hashtag} #DigitalMarketing #MarketerRaja"
+                ),
+            }
+            print(f"Selected daily tip: {hook}")
+
+    
     render(post["slides"], OUTPUT)
     (OUTPUT / "caption.txt").write_text(post["caption"], encoding="utf-8")
     (OUTPUT / "story.json").write_text(json.dumps({**story, "slides": post["slides"]},
