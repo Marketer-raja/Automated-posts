@@ -42,7 +42,9 @@ def main():
                 return skip("A carousel has already been published today.")
         affinity = ig.audience_scores(records) if ig else {}
         # A thin announcement may be rejected by the writer. Try the next candidate.
-            try:
+
+
+        try:
             candidates = rank(records, affinity)
         except RuntimeError as exc:
             if str(exc) != "All primary feeds failed. Check the workflow logs.":
