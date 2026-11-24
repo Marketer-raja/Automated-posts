@@ -28,5 +28,14 @@
     "parent": "18038651672673127",
     "run_day": "2026-11-23",
     "media_id": "18111620699628933"
+  },
+  "9566e4a73e7bad1a8e1a": {
+    "title": "OpenAI Agents SDK v0.26.0",
+    "date": "2026-11-24",
+    "category": "AI agents",
+    "url": "https://github.com/openai/openai-agents-python/releases/tag/v0.26.0",
+    "state": "pending",
+    "parent": "18038852000673127",
+    "run_day": "2026-11-24"
   }
 }
