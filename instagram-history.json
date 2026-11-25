@@ -38,5 +38,14 @@
     "parent": "18038852000673127",
     "run_day": "2026-11-24",
     "media_id": "18084529721751816"
+  },
+  "16f11be211a4bdda5000": {
+    "title": "Google ADK v2.15.1",
+    "date": "2026-11-25",
+    "category": "AI agents",
+    "url": "https://github.com/google/adk-python/releases/tag/v2.15.1",
+    "state": "pending",
+    "parent": "18039181877673127",
+    "run_day": "2026-11-25"
   }
 }
