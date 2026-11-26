@@ -48,5 +48,14 @@
     "parent": "18039181877673127",
     "run_day": "2026-11-25",
     "media_id": "18140848165630995"
+  },
+  "0d108e7b71c406494d2f": {
+    "title": "How Gemini is changing the game for Golden State's organization and fans.",
+    "date": "2026-11-24",
+    "category": "AI tools",
+    "url": "https://blog.google/products-and-platforms/products/gemini/gemini-golden-state/",
+    "state": "pending",
+    "parent": "18039394799673127",
+    "run_day": "2026-11-26"
   }
 }
